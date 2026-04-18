@@ -5,7 +5,7 @@ import { getStorage } from 'firebase/storage';
 
 // 🔥 Paste YOUR Firebase config here
 const firebaseConfig = {
-  apiKey: "AIzaSyA2cVTbOyJI4vctAfTHG-GhwMbtH6lkBio",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
   authDomain: "servesync-e7dba.firebaseapp.com",
   projectId: "servesync-e7dba",
   storageBucket: "servesync-e7dba.firebasestorage.app",
