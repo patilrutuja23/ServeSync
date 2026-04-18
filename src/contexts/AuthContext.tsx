@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDocFromServer, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface UserProfile {
   uid: string;
@@ -34,33 +34,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
+    // Safety timeout — if Firebase auth doesn't respond in 8s, unblock the UI
+    const timeout = setTimeout(() => {
+      console.warn('[Auth] Timeout — unblocking UI');
+      setLoading(false);
+      setIsAuthReady(true);
+    }, 8000);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(timeout);
       setUser(firebaseUser);
+
       if (firebaseUser) {
-        const docRef = doc(db, 'users', firebaseUser.uid);
-        // Always read from server — never from local cache — so a deleted
-        // or updated profile is reflected immediately on auth state change.
-        const docSnap = await getDocFromServer(docRef);
-        if (docSnap.exists()) {
-          setProfile(docSnap.data() as UserProfile);
-        } else {
+        try {
+          const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+          setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
+        } catch (err) {
+          console.error('[Auth] Failed to fetch profile:', err);
           setProfile(null);
         }
       } else {
         setProfile(null);
       }
+
+      setLoading(false);
+      setIsAuthReady(true);
+    }, (err) => {
+      clearTimeout(timeout);
+      console.error('[Auth] onAuthStateChanged error:', err);
       setLoading(false);
       setIsAuthReady(true);
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(timeout);
+      unsubscribe();
+    };
   }, []);
 
   const refreshProfile = async () => {
     if (!auth.currentUser) return;
-    const docSnap = await getDocFromServer(doc(db, 'users', auth.currentUser.uid));
-    if (docSnap.exists()) setProfile(docSnap.data() as UserProfile);
-    else setProfile(null);
+    try {
+      const snap = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
+    } catch (err) {
+      console.error('[Auth] refreshProfile error:', err);
+    }
   };
 
   const signOut = () => auth.signOut();
