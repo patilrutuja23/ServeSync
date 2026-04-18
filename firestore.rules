@@ -1,0 +1,207 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - role: string (required, 'volunteer' or 'ngo')
+    //   - displayName: string
+    //   - photoURL: string
+    //   - skills: list of strings
+    //   - location: string
+    //   - availability: string
+    //   - bio: string
+    //   - organizationName: string
+    //   - createdAt: timestamp
+    //
+    // Collection: opportunities
+    // Fields:
+    //   - title: string (required)
+    //   - description: string
+    //   - requiredSkills: list of strings
+    //   - location: string
+    //   - dateTime: timestamp
+    //   - ngoId: string (required)
+    //   - ngoName: string (required)
+    //   - createdAt: timestamp
+    //
+    // Collection: connections
+    // Fields:
+    //   - volunteerId: string (required)
+    //   - ngoId: string (required)
+    //   - opportunityId: string
+    //   - status: string ('pending', 'accepted', 'rejected')
+    //   - type: string ('request', 'invite')
+    //   - message: string
+    //   - createdAt: timestamp
+    //
+    // Collection: activities
+    // Fields:
+    //   - userId: string (required)
+    //   - action: string
+    //   - details: string
+    //   - timestamp: timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "patilrutuja042@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.role in ['volunteer', 'ngo', 'admin'] &&
+             (!('skills' in data) || data.skills is list) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() < 1000));
+    }
+
+    function isValidOpportunity(data) {
+      return data.keys().hasAll(['title', 'ngoId', 'ngoName']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.ngoId is string &&
+             data.ngoName is string &&
+             (!('requiredSkills' in data) || data.requiredSkills is list);
+    }
+
+    function isValidConnection(data) {
+      return data.keys().hasAll(['volunteerId', 'ngoId', 'status', 'type']) &&
+             data.status in ['pending', 'accepted', 'rejected'] &&
+             data.type in ['request', 'invite'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // Users can read their own profile.
+      // Others can read if authenticated (for matching), but we should ideally restrict PII.
+      // For this MVP, we allow authenticated reads but restrict writes.
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && 
+                    (request.resource.data.role != 'admin' || isAdmin());
+      
+      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) &&
+                    (request.resource.data.role == resource.data.role || isAdmin());
+      
+      allow delete: if isAdmin();
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ngo' &&
+                    isValidOpportunity(request.resource.data) &&
+                    request.resource.data.ngoId == request.auth.uid;
+      allow update: if isAuthenticated() && 
+                    resource.data.ngoId == request.auth.uid &&
+                    isValidOpportunity(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.ngoId == request.auth.uid || isAdmin());
+    }
+
+    match /connections/{connectionId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.volunteerId || 
+        request.auth.uid == resource.data.ngoId
+      );
+      
+      allow create: if isAuthenticated() && isValidConnection(request.resource.data) && (
+        (request.resource.data.type == 'request' && request.resource.data.volunteerId == request.auth.uid) ||
+        (request.resource.data.type == 'invite' && request.resource.data.ngoId == request.auth.uid)
+      );
+      
+      allow update: if isAuthenticated() && (
+        // Volunteer can accept/reject an invite
+        (resource.data.type == 'invite' && request.auth.uid == resource.data.volunteerId && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])) ||
+        // NGO can accept/reject a request
+        (resource.data.type == 'request' && request.auth.uid == resource.data.ngoId && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+      );
+      
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.volunteerId || 
+        request.auth.uid == resource.data.ngoId || 
+        isAdmin()
+      );
+    }
+
+    match /activities/{activityId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+    
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // ── workProofs ──────────────────────────────────────────────────────────
+    // Anyone authenticated can read; only the owner can write/delete.
+    match /workProofs/{proofId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.role in ['volunteer', 'ngo'] &&
+                    request.resource.data.imageUrl is string &&
+                    request.resource.data.imageUrl.size() > 0;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow update: if false; // proofs are immutable once uploaded
+    }
+
+    // ── ngo_verification ────────────────────────────────────────────────────
+    // NGO can create/read their own; admin can update status.
+    match /ngo_verification/{docId} {
+      allow read: if isAuthenticated() &&
+                  (request.auth.uid == resource.data.ngoId || isAdmin());
+      allow create: if isAuthenticated() &&
+                    request.resource.data.ngoId == request.auth.uid &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ngo' &&
+                    request.resource.data.documentUrl is string &&
+                    request.resource.data.status == 'pending';
+      allow update: if isAdmin(); // only admin can approve/reject
+      allow delete: if isAdmin();
+    }
+
+    // ── posts ────────────────────────────────────────────────────────────────
+    // All authenticated users can read; only the owning NGO can write/delete.
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                    request.resource.data.ngoId == request.auth.uid &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ngo' &&
+                    request.resource.data.title is string &&
+                    request.resource.data.title.size() > 0 &&
+                    request.resource.data.title.size() < 200 &&
+                    request.resource.data.description is string &&
+                    request.resource.data.description.size() > 0;
+      allow delete: if isAuthenticated() &&
+                    (resource.data.ngoId == request.auth.uid || isAdmin());
+      allow update: if false; // posts are immutable; delete and re-create to edit
+    }
+  }
+}

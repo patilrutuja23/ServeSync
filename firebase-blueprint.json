@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile, either a Volunteer or an NGO.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["volunteer", "ngo"] },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "availability": { "type": "string" },
+        "bio": { "type": "string" },
+        "organizationName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Opportunity": {
+      "title": "Opportunity",
+      "description": "A volunteering opportunity posted by an NGO.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "requiredSkills": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "dateTime": { "type": "string", "format": "date-time" },
+        "ngoId": { "type": "string" },
+        "ngoName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "ngoId", "ngoName"]
+    },
+    "Connection": {
+      "title": "Connection",
+      "description": "A connection request or invite between a volunteer and an NGO.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "volunteerId": { "type": "string" },
+        "ngoId": { "type": "string" },
+        "opportunityId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+        "type": { "type": "string", "enum": ["request", "invite"] },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["volunteerId", "ngoId", "status", "type"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "A history log of user actions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/opportunities/{opportunityId}": {
+      "schema": "Opportunity",
+      "description": "Volunteering opportunities."
+    },
+    "/connections/{connectionId}": {
+      "schema": "Connection",
+      "description": "Invites and connection requests."
+    },
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Activity history logs."
+    }
+  }
+}

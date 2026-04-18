@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-background: #F8FAFC;
+  --color-foreground: #1E293B;
+  
+  --color-primary: #10B981;
+  --color-primary-foreground: #FFFFFF;
+  
+  --color-secondary: #0EA5E9;
+  --color-secondary-foreground: #FFFFFF;
+  
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  
+  --color-accent: #F1F5F9;
+  --color-accent-foreground: #1E293B;
+  
+  --color-border: #E2E8F0;
+  --color-input: #E2E8F0;
+  --color-ring: #10B981;
+  
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --shadow-sleek: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .sleek-card {
+    @apply bg-white rounded-[16px] border border-border p-5 shadow-sleek;
+  }
+  
+  .section-title {
+    @apply text-[14px] font-semibold uppercase tracking-[0.5px] text-muted-foreground mb-2;
+  }
+  
+  .ai-match-tag {
+    @apply bg-linear-to-r from-[#F0FDFA] to-[#F0F9FF] text-secondary font-bold text-[11px] px-2 py-0.5 rounded border border-[#E0F2FE] inline-block mb-2;
+  }
+  
+  .role-badge {
+    @apply bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-[12px] font-semibold border border-[#D1FAE5];
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-white/50;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+}
