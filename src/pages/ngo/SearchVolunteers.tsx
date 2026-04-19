@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Search, MapPin, Send, Filter, Zap, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { calculateRuleScore, getAIScore, calculateHybridScore } from '../../lib/matching';
+import { explainMatch } from '../../lib/aiFeatures';
 import { RatingDisplay, CompletedTasksBadge } from '../../lib/trust.tsx';
 import UserAvatar from '../../components/UserAvatar';
 
@@ -20,6 +21,7 @@ interface VolunteerWithScore {
   score: number;
   breakdown: string;
   aiScored: boolean;
+  explanation?: string;
 }
 
 export default function NGOSearchVolunteers() {
@@ -32,6 +34,8 @@ export default function NGOSearchVolunteers() {
   const [matching, setMatching] = useState(false);
   const [ranked, setRanked] = useState<VolunteerWithScore[]>([]);
 
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [loadingExplanation, setLoadingExplanation] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
 
@@ -161,6 +165,22 @@ export default function NGOSearchVolunteers() {
     setRanked([]);
     runMatching(volunteers, opportunities);
   }, [volunteers, opportunities, loading, runMatching]);
+
+  const handleExplainMatch = async (v: any) => {
+    if (explanations[v.id] || loadingExplanation === v.id) return;
+    const bestOpp = opportunities[0];
+    if (!bestOpp) return;
+    setLoadingExplanation(v.id);
+    try {
+      const text = await explainMatch(v, bestOpp);
+      setExplanations(prev => ({ ...prev, [v.id]: text }));
+      console.log('[MatchExplain]', v.displayName, ':', text);
+    } catch (err) {
+      console.error('[MatchExplain] Error:', err);
+    } finally {
+      setLoadingExplanation(null);
+    }
+  };
 
   const isAlreadyInvited = (volunteerId: string, opportunityId: string) =>
     sentInvites.some(i => i.volunteerId === volunteerId && i.opportunityId === opportunityId);
@@ -298,16 +318,27 @@ export default function NGOSearchVolunteers() {
                 </div>
 
                 <div className="flex-1 space-y-4">
-                  {/* Match score badge */}
-                  <div className={`flex items-center justify-between px-3 py-2 rounded-xl ${getScoreColor(score)} border`}>
-                    <span className="text-[11px] font-bold flex items-center gap-1 uppercase tracking-wider">
-                      <Zap size={11} /> {aiScored ? 'AI Match' : 'Match'}
-                    </span>
-                    <span className="text-sm font-extrabold">{score}%</span>
+                  {/* Match score + explanation */}
+                  <div>
+                    <div className={`flex items-center justify-between px-3 py-2 rounded-xl ${getScoreColor(score)} border`}>
+                      <span className="text-[11px] font-bold flex items-center gap-1 uppercase tracking-wider">
+                        <Zap size={11} /> {aiScored ? 'AI Match' : 'Match'}
+                      </span>
+                      <span className="text-sm font-extrabold">{score}%</span>
+                    </div>
+                    {/* Explanation — loads on hover/click */}
+                    {explanations[v.id] ? (
+                      <p className="mt-2 text-[12px] text-slate-600 italic leading-relaxed">{explanations[v.id]}</p>
+                    ) : (
+                      <button
+                        onClick={() => handleExplainMatch(v)}
+                        disabled={loadingExplanation === v.id}
+                        className="mt-1.5 text-[11px] text-primary font-semibold hover:underline disabled:opacity-50"
+                      >
+                        {loadingExplanation === v.id ? '✨ Explaining...' : '✨ Why this match?'}
+                      </button>
+                    )}
                   </div>
-                  {breakdown && (
-                    <p className="text-[11px] text-slate-400 italic line-clamp-2">{breakdown}</p>
-                  )}
 
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Top Skills</p>

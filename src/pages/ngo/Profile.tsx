@@ -10,11 +10,12 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
-import { MapPin, Calendar, Mail, History, Send, CheckCircle2, Clock, XCircle, Building2, Camera, ShieldCheck } from 'lucide-react';
+import { MapPin, Calendar, Mail, History, Send, CheckCircle2, Clock, XCircle, Building2, Camera, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import UserAvatar from '../../components/UserAvatar';
 import WorkProofGallery from '../../components/WorkProofGallery';
 import { VerifiedBadge } from '../../lib/trust.tsx';
+import { detectFakeNGO, TrustResult } from '../../lib/aiFeatures';
 
 export default function NGOProfile() {
   const { profile, user, refreshProfile } = useAuth();
@@ -27,6 +28,37 @@ export default function NGOProfile() {
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [editLocation, setEditLocation] = useState('');
+
+  const [trustResult, setTrustResult] = useState<TrustResult | null>(null);
+  const [checkingTrust, setCheckingTrust] = useState(false);
+
+  // Run trust check once opportunities and posts counts are known
+  useEffect(() => {
+    if (!profile || loading) return;
+    const run = async () => {
+      setCheckingTrust(true);
+      try {
+        // Count posts for this NGO
+        const { getDocs, query: q2, collection: col2, where: w2 } = await import('firebase/firestore');
+        const postSnap = await getDocs(q2(col2(db, 'posts'), w2('userId', '==', profile.uid)));
+        const result = await detectFakeNGO({
+          displayName: profile.displayName || '',
+          bio: profile.bio || '',
+          location: profile.location || '',
+          isVerified: (profile as any).isVerified ?? false,
+          opportunityCount: opportunities.length,
+          postCount: postSnap.size,
+        });
+        setTrustResult(result);
+        console.log('[TrustCheck]', result);
+      } catch (err) {
+        console.error('[TrustCheck] Error:', err);
+      } finally {
+        setCheckingTrust(false);
+      }
+    };
+    run();
+  }, [profile, loading, opportunities.length]);
 
   const openEdit = () => {
     setEditName(profile?.displayName || profile?.organizationName || '');
@@ -125,6 +157,22 @@ export default function NGOProfile() {
                   ? <VerifiedBadge size="md" />
                   : <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold px-2.5 py-1 rounded-full"><ShieldCheck size={12} /> Verification Pending</span>
                 }
+                {/* AI Trust Badge */}
+                {checkingTrust && (
+                  <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-400 border border-slate-200 text-[11px] font-bold px-2.5 py-1 rounded-full animate-pulse">Checking trust...</span>
+                )}
+                {trustResult && !checkingTrust && (
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                    trustResult.status === 'trusted'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : trustResult.status === 'suspicious'
+                      ? 'bg-red-50 text-red-600 border-red-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`} title={trustResult.reason}>
+                    {trustResult.status === 'trusted' ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                    {trustResult.status === 'trusted' ? 'Trusted NGO' : trustResult.status === 'suspicious' ? 'Needs Review' : 'Unverified'}
+                  </span>
+                )}
               </div>
             </div>
             <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold px-8 h-12 shadow-lg shadow-secondary/20" onClick={openEdit}>

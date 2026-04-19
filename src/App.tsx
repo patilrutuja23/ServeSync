@@ -19,6 +19,9 @@ import NGOSentInvites from './pages/ngo/SentInvites';
 import NGOProfile from './pages/ngo/Profile';
 import NGOVerification from './pages/ngo/Verification';
 import NGOBlog from './pages/ngo/Blog';
+import CommunityFeed from './pages/community/Feed';
+import ImpactAnalytics from './pages/community/ImpactAnalytics';
+import ChatPage from './pages/chat/ChatPage';
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 'volunteer' | 'ngo' }) => {
   const { user, profile, loading } = useAuth();
@@ -89,6 +92,23 @@ function AppRoutes() {
           <Route path="/ngo/blog" element={
             <ProtectedRoute role="ngo">
               <NGOBlog />
+            </ProtectedRoute>
+          } />
+
+          {/* Community — accessible to all logged-in users */}
+          <Route path="/community" element={
+            <ProtectedRoute>
+              <CommunityFeed />
+            </ProtectedRoute>
+          } />
+          <Route path="/impact" element={
+            <ProtectedRoute>
+              <ImpactAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           } />
 

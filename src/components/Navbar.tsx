@@ -22,6 +22,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import UserAvatar from './UserAvatar';
+import NotificationBell from './NotificationBell';
 
 import { useLocation } from 'react-router-dom';
 
@@ -72,6 +73,8 @@ export default function Navbar() {
             <>
               <Link to="/volunteer" className={`text-sm font-medium transition-colors ${location.pathname === '/volunteer' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Dashboard</Link>
               <Link to="/volunteer/opportunities" className={`text-sm font-medium transition-colors ${location.pathname === '/volunteer/opportunities' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Opportunities</Link>
+              <Link to="/community" className={`text-sm font-medium transition-colors ${location.pathname === '/community' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Community</Link>
+              <Link to="/impact" className={`text-sm font-medium transition-colors ${location.pathname === '/impact' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Impact</Link>
               <Link to="/volunteer/profile" className={`text-sm font-medium transition-colors ${location.pathname === '/volunteer/profile' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>My Profile</Link>
             </>
           )}
@@ -79,7 +82,8 @@ export default function Navbar() {
             <>
               <Link to="/ngo" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Dashboard</Link>
               <Link to="/ngo/search" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo/search' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Find Volunteers</Link>
-              <Link to="/ngo/blog" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo/blog' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Posts</Link>
+              <Link to="/community" className={`text-sm font-medium transition-colors ${location.pathname === '/community' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Community</Link>
+              <Link to="/impact" className={`text-sm font-medium transition-colors ${location.pathname === '/impact' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Impact</Link>
               <Link to="/ngo/invites" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo/invites' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Sent Invites</Link>
               <Link to="/ngo/verification" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo/verification' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>Verification</Link>
               <Link to="/ngo/profile" className={`text-sm font-medium transition-colors ${location.pathname === '/ngo/profile' ? 'text-primary border-b-2 border-primary pb-[24px] -mb-[24px]' : 'text-slate-500 hover:text-slate-900'}`}>NGO Profile</Link>
@@ -106,10 +110,14 @@ export default function Navbar() {
             </Button>
           )}
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <span className="role-badge hidden sm:inline-block">
                 {profile?.role === 'volunteer' ? 'Volunteer Role' : 'NGO Partner'}
               </span>
+              <Link to="/chat" className="relative w-10 h-10 flex items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition-colors" title="Messages">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </Link>
+              <NotificationBell />
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative h-10 w-10 rounded-full p-0 border border-slate-200 bg-transparent hover:bg-transparent focus:outline-none overflow-hidden">
                   <UserAvatar src={profile?.photoURL} alt={profile?.displayName} className="w-full h-full rounded-full" />
