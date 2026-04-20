@@ -111,8 +111,8 @@ ServeSync is an **AI-powered, real-time platform** that:
 ### 1️⃣ Clone the repository
 
 ```bash id="m1g8ok"
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/patilrutuja23/ServeSync
+cd ServeSync
 ```
 
 ---
