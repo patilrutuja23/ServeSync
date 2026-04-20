@@ -1,74 +1,266 @@
-<div align="center">
-<img width="1200" height="475" alt="ServeSync Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🌍 ServeSync – AI-Powered NGO & Volunteer Platform
 
-# ServeSync
+🚀 A real-time platform connecting NGOs and volunteers with intelligent matching, trust verification, and live collaboration.
 
-ServeSync is a React + Vite web app for volunteer and NGO collaboration. It includes authentication, community feeds, volunteer search, opportunity management, and Firebase integration.
+---
 
-## Features
+## 🔗 Live Demo
 
-- Firebase authentication with Google sign-in
-- Firestore-backed community feed and volunteer opportunities
-- NGO dashboards, blog posts, and verification workflows
-- Volunteer profiles and public profile pages
-- Notification support and file storage via Firebase Storage
+👉 https://servesync-e7dba.web.app/
 
-## Prerequisites
+---
 
-- Node.js 18+ installed
-- Firebase project with Authentication, Firestore, and Storage enabled
+## 📌 Problem Statement
 
-## Setup
+Many NGOs struggle to find the right volunteers, and volunteers struggle to find meaningful opportunities.
+There is also a lack of **trust, transparency, and real-time collaboration** in existing platforms.
 
-1. Install dependencies:
-   `npm install`
+---
 
-2. Create a `.env.local` file in the project root with the following variables:
+## 💡 Solution
 
-```env
-VITE_FIREBASE_API_KEY=your_api_key
+ServeSync is an **AI-powered, real-time platform** that:
+
+* Matches volunteers with NGOs intelligently
+* Verifies NGOs for trust
+* Enables real-time communication
+* Tracks impact with live analytics
+
+---
+
+## ✨ Features
+
+### 🔍 Smart Matching
+
+* AI-based volunteer ↔ NGO matching
+* Match percentage + explanation
+
+### 👤 Role-Based System
+
+* Volunteer Dashboard
+* NGO Dashboard
+* Admin Panel (separate login)
+
+### 🛡 NGO Verification System
+
+* NGOs upload documents
+* Admin approves/rejects
+* Verified badge system
+
+### 📸 Work & Post System
+
+* NGOs & volunteers can create posts
+* Image upload via Cloudinary
+* Global community feed (like Instagram)
+
+### 🤖 AI Features
+
+* AI caption generator
+* AI match explanation
+
+### ⚡ Real-Time System
+
+* Live updates using Firestore `onSnapshot`
+* Instant UI updates (no refresh)
+
+### 🔔 Notifications
+
+* Real-time alerts for:
+
+  * Matches
+  * Messages
+  * Posts
+  * Verification
+
+### 💬 Live Chat
+
+* NGO ↔ Volunteer messaging
+* Real-time conversation
+
+### 📊 Impact Analytics
+
+* Real-time stats:
+
+  * Volunteers
+  * Posts
+  * Tasks completed
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+* React (Vite)
+* Tailwind CSS
+
+### Backend & Services
+
+* Firebase Authentication
+* Firestore (Database + Real-time)
+* Firebase Hosting
+
+### Media Storage
+
+* Cloudinary (image uploads)
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the repository
+
+```bash id="m1g8ok"
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+```
+
+---
+
+### 2️⃣ Install dependencies
+
+```bash id="6hjh2l"
+npm install
+```
+
+---
+
+### 3️⃣ Setup Environment Variables
+
+Create `.env` file:
+
+```env id="r8hz9d"
+VITE_FIREBASE_API_KEY=your_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+VITE_FIREBASE_MESSAGING_SENDER_ID=xxxx
+VITE_FIREBASE_APP_ID=xxxx
+
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 ```
 
-> The app reads Firebase config from `import.meta.env`, so do not commit `.env.local`.
+---
 
-## Run Locally
+### 4️⃣ Run locally
 
-```bash
+```bash id="c1j92c"
 npm run dev
 ```
 
-Then open the local Vite URL shown in the terminal (default is `http://localhost:3000`).
+---
 
-## Build
+## 🚀 Deployment (Firebase Hosting)
 
-```bash
+### Step 1: Install Firebase CLI
+
+```bash id="b0c4bn"
+npm install -g firebase-tools
+```
+
+---
+
+### Step 2: Login to Firebase
+
+```bash id="rmx1fg"
+firebase login
+```
+
+---
+
+### Step 3: Initialize Hosting
+
+```bash id="gq6hcm"
+firebase init
+```
+
+Select:
+
+* Hosting
+* Choose your project
+* Public directory: `dist`
+* Single-page app: **Yes**
+
+---
+
+### Step 4: Build project
+
+```bash id="mq2i0h"
 npm run build
 ```
 
-## Preview
+---
 
-```bash
-npm run preview
+### Step 5: Deploy
+
+```bash id="p9i6l2"
+firebase deploy
 ```
 
-## Project Structure
+---
 
-- `src/App.tsx` – main application shell and routing
-- `src/main.tsx` – Vite application bootstrap
-- `src/firebase.ts` – Firebase initialization and config
-- `src/pages` – route-based page components for auth, community, NGO, volunteer flows
-- `src/components` – reusable UI components and feature widgets
-- `src/lib` – helper utilities for AI, chat, matching, notifications, storage, and trust logic
+### 🌐 Your app will be live at:
 
-## Notes
+```id="2f4g5j"
+https://your-project-id.web.app
+```
 
-- This repository uses Vite + React + TypeScript.
-- Firebase settings are loaded from `VITE_FIREBASE_*` environment variables.
-- Remove any local `.env.local` values before sharing this repository.
+---
+
+## 🔐 Admin Access
+
+* Go to Firestore → users collection
+* Add field:
+
+  ```
+  role: "admin"
+  ```
+
+### Admin Login:
+
+```id="v9y3rc"
+/admin-login
+```
+
+---
+
+## 📂 Project Structure
+
+```id="3lhp2t"
+src/
+ ├── components/
+ ├── pages/
+ ├── context/
+ ├── firebase/
+ ├── utils/
+```
+
+---
+
+## 🎯 Future Enhancements
+
+* 🧠 AI fake NGO detection
+* 📊 Advanced analytics
+* ❤️ Likes & comments
+* 🔔 Push notifications
+
+---
+
+## 🤝 Contributors
+
+* Your Name
+
+---
+
+## 📜 License
+
+For educational and hackathon use.
+
+---
+
+## 💬 Final Note
+
+> “ServeSync is a real-time, AI-powered ecosystem enabling trust, collaboration, and measurable social impact.”
+
+✨ Built for Google Solution Challenge
