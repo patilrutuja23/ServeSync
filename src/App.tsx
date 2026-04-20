@@ -19,11 +19,13 @@ import NGOSentInvites from './pages/ngo/SentInvites';
 import NGOProfile from './pages/ngo/Profile';
 import NGOVerification from './pages/ngo/Verification';
 import NGOBlog from './pages/ngo/Blog';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminLogin from './pages/admin/Login';
 import CommunityFeed from './pages/community/Feed';
 import ImpactAnalytics from './pages/community/ImpactAnalytics';
 import ChatPage from './pages/chat/ChatPage';
 
-const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 'volunteer' | 'ngo' }) => {
+const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 'volunteer' | 'ngo' | 'admin' }) => {
   const { user, profile, loading } = useAuth();
 
   if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -34,7 +36,19 @@ const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 
 };
 
 function AppRoutes() {
-  const { profile } = useAuth();
+  const { user, profile, loading } = useAuth();
+
+  // Admin gets its own full-page layout — no shared Navbar or container.
+  // /admin-login must stay accessible even before auth resolves.
+  if (!loading && user && profile?.role === 'admin') {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -44,6 +58,7 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           
           {/* Volunteer Routes */}
           <Route path="/volunteer" element={

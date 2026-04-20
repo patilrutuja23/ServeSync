@@ -93,6 +93,7 @@ export default function Navbar() {
             <>
               <Link to="/#features" className="text-sm font-medium text-slate-500 hover:text-slate-900">Features</Link>
               <Link to="/#impact" className="text-sm font-medium text-slate-500 hover:text-slate-900">Impact</Link>
+              <Link to="/admin-login" className="text-sm font-medium text-slate-500 hover:text-violet-700 transition-colors">Admin</Link>
             </>
           )}
         </nav>

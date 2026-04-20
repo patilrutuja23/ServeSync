@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadFile } from '../lib/storage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -133,9 +133,8 @@ export default function CreatePostModal({ open, onClose }: CreatePostModalProps)
     try {
       let imageUrl = '';
       if (imageFile) {
-        const storageRef = ref(storage, `posts/${user.uid}_${Date.now()}`);
-        await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(storageRef);
+        const path = `posts/${user.uid}_${Date.now()}`;
+        imageUrl = await uploadFile(imageFile, path);
         console.log('[CreatePost] Image uploaded:', imageUrl);
       }
 

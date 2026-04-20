@@ -29,9 +29,10 @@ export default function Login() {
       if (docSnap.exists()) {
         const profile = docSnap.data();
         toast.success('Welcome back!');
-        navigate(profile.role === 'volunteer' ? '/volunteer' : '/ngo');
+        if (profile.role === 'admin')          navigate('/admin');
+        else if (profile.role === 'volunteer') navigate('/volunteer');
+        else                                   navigate('/ngo');
       } else {
-        // User exists in Auth but not in Firestore - redirect to register to complete profile
         toast.error('Profile not found. Please complete registration.');
         navigate('/register');
       }
@@ -53,7 +54,9 @@ export default function Login() {
       if (docSnap.exists()) {
         const profile = docSnap.data();
         toast.success('Welcome back!');
-        navigate(profile.role === 'volunteer' ? '/volunteer' : '/ngo');
+        if (profile.role === 'admin')          navigate('/admin');
+        else if (profile.role === 'volunteer') navigate('/volunteer');
+        else                                   navigate('/ngo');
       } else {
         toast.info('Please complete your profile registration.');
         navigate('/register');

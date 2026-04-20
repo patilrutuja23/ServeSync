@@ -1,10 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { db } from '../firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { Button } from '../components/ui/button';
 import { HandHeart, Users, Building2, Sparkles, ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Home() {
+  const [volunteerCount, setVolunteerCount] = useState(0);
+  const [ngoCount, setNgoCount]             = useState(0);
+  const [postCount, setPostCount]           = useState(0);
+  const [connCount, setConnCount]           = useState(0);
+
+  useEffect(() => {
+    // Real-time volunteer count
+    const unsubVol = onSnapshot(
+      query(collection(db, 'users'), where('role', '==', 'volunteer')),
+      snap => setVolunteerCount(snap.size)
+    );
+    // Real-time NGO count
+    const unsubNgo = onSnapshot(
+      query(collection(db, 'users'), where('role', '==', 'ngo')),
+      snap => setNgoCount(snap.size)
+    );
+    // Real-time posts count
+    const unsubPosts = onSnapshot(
+      collection(db, 'posts'),
+      snap => setPostCount(snap.size)
+    );
+    // Real-time accepted connections (completed tasks proxy)
+    const unsubConn = onSnapshot(
+      query(collection(db, 'connections'), where('status', '==', 'accepted')),
+      snap => setConnCount(snap.size)
+    );
+    return () => { unsubVol(); unsubNgo(); unsubPosts(); unsubConn(); };
+  }, []);
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
@@ -68,10 +98,10 @@ export default function Home() {
         <div className="container mx-auto px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { label: 'Volunteers', value: '10k+' },
-              { label: 'NGO Partners', value: '500+' },
-              { label: 'Hours Contributed', value: '1.2M' },
-              { label: 'Impact Created', value: '$25M+' },
+              { label: 'Volunteers',        value: volunteerCount },
+              { label: 'NGO Partners',      value: ngoCount },
+              { label: 'Tasks Completed',   value: connCount },
+              { label: 'Activity Posts',    value: postCount },
             ].map((stat, i) => (
               <motion.div 
                 key={i}

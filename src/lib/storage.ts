@@ -1,33 +1,57 @@
-import { storage } from '../firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+// Upload via Cloudinary — no Firebase Storage billing required.
+// Firestore is still used for all metadata/data storage (unchanged).
+// Callers use the same uploadFile() signature as before.
+
+const CLOUD_NAME   = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
 
 /**
- * Uploads a file to Firebase Storage and returns the public download URL.
+ * Uploads a file to Cloudinary and returns the secure public URL.
+ *
  * @param file       The File object to upload
- * @param path       Storage path, e.g. "workProofs/uid/filename.jpg"
- * @param onProgress Optional callback receiving 0–100 progress
+ * @param _path      Ignored (was Firebase Storage path) — kept for API compatibility
+ * @param onProgress Optional callback receiving 0 at start and 100 on finish
  */
 export async function uploadFile(
   file: File,
-  path: string,
+  _path: string,
   onProgress?: (pct: number) => void
 ): Promise<string> {
-  const storageRef = ref(storage, path);
-  return new Promise((resolve, reject) => {
-    const task = uploadBytesResumable(storageRef, file);
-    task.on(
-      'state_changed',
-      (snap) => {
-        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-        onProgress?.(pct);
-      },
-      reject,
-      async () => {
-        const url = await getDownloadURL(task.snapshot.ref);
-        resolve(url);
-      }
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error(
+      'Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME and ' +
+      'VITE_CLOUDINARY_UPLOAD_PRESET to your .env.local file.'
     );
-  });
+  }
+
+  console.log('[Cloudinary] Uploading:', file.name, `(${(file.size / 1024).toFixed(1)} KB)`);
+  onProgress?.(0);
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[Cloudinary] Upload failed:', res.status, errText);
+    throw new Error(`Cloudinary upload failed (${res.status}): ${errText}`);
+  }
+
+  const data = await res.json();
+  const url: string = data.secure_url;
+
+  if (!url) {
+    throw new Error('Cloudinary returned no URL. Check your upload preset settings.');
+  }
+
+  console.log('[Cloudinary] Upload success:', url);
+  onProgress?.(100);
+  return url;
 }
 
 /** Validates that a file is an image and under maxMB (default 5 MB) */

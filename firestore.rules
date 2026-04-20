@@ -97,16 +97,16 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{userId} {
-      // Users can read their own profile.
-      // Others can read if authenticated (for matching), but we should ideally restrict PII.
-      // For this MVP, we allow authenticated reads but restrict writes.
       allow read: if isAuthenticated();
       
       allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && 
                     (request.resource.data.role != 'admin' || isAdmin());
       
-      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) &&
-                    (request.resource.data.role == resource.data.role || isAdmin());
+      // Owner can update their own profile; admin can update any field (e.g. isVerified)
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) ||
+        isAdmin()
+      );
       
       allow delete: if isAdmin();
     }
@@ -174,7 +174,7 @@ service cloud.firestore {
     }
 
     // ── ngo_verification ────────────────────────────────────────────────────
-    // NGO can create/read their own; admin can update status.
+    // NGO can create/read their own; admin can read ALL and update status.
     match /ngo_verification/{docId} {
       allow read: if isAuthenticated() &&
                   (request.auth.uid == resource.data.ngoId || isAdmin());
@@ -183,7 +183,7 @@ service cloud.firestore {
                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ngo' &&
                     request.resource.data.documentUrl is string &&
                     request.resource.data.status == 'pending';
-      allow update: if isAdmin(); // only admin can approve/reject
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 

@@ -1,25 +1,34 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 
 // All config is read from .env.local — never hardcoded, never pushed to GitHub.
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            as string,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        as string,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         as string,
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     as string,
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY             as string,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN         as string,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID          as string,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET      as string,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID             as string,
-  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID     as string,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID              as string,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID      as string,
 };
 
 const app = initializeApp(firebaseConfig);
 
-export const db      = getFirestore(app);
+// Memory-only cache — no IndexedDB persistence.
+// Deleted documents are never served from a stale local cache.
+export const db      = initializeFirestore(app, {});
 export const auth    = getAuth(app);
-export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Verify Firestore connectivity on startup
+(async () => {
+  try {
+    await getDocFromServer(doc(db, '_health', 'ping'));
+  } catch {
+    // Expected 404 — just confirms the connection works
+  }
+})();
 
 export enum OperationType {
   CREATE = 'create',
