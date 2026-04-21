@@ -1,8 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 
-// All config is read from .env.local — never hardcoded, never pushed to GitHub.
 const firebaseConfig = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY             as string,
   authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN         as string,
@@ -15,20 +16,66 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Memory-only cache — no IndexedDB persistence.
-// Deleted documents are never served from a stale local cache.
-export const db      = initializeFirestore(app, {});
-export const auth    = getAuth(app);
+// Standard Firestore — works on all platforms including mobile browsers.
+// experimentalForceLongPolling ensures WebSocket fallback on restrictive networks.
+export const db = getFirestore(app);
+export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+export const storage = getStorage(app);
 
-// Verify Firestore connectivity on startup
-(async () => {
+// ─── FCM Push Notifications ───────────────────────────────────────────────────
+
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY as string;
+
+/**
+ * Requests notification permission and returns the FCM token.
+ * Returns null if permission denied or FCM not supported.
+ */
+export async function requestFCMToken(): Promise<string | null> {
   try {
-    await getDocFromServer(doc(db, '_health', 'ping'));
-  } catch {
-    // Expected 404 — just confirms the connection works
+    const supported = await isSupported();
+    if (!supported) {
+      console.warn('[FCM] Not supported in this browser.');
+      return null;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('[FCM] Permission denied.');
+      return null;
+    }
+    const messaging = getMessaging(app);
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    console.log('[FCM] Token:', token);
+    return token;
+  } catch (err) {
+    console.error('[FCM] requestFCMToken error:', err);
+    return null;
   }
-})();
+}
+
+/**
+ * Listens for foreground FCM messages and shows a browser Notification.
+ * Call once on app mount for logged-in users.
+ */
+export async function listenForegroundMessages(): Promise<() => void> {
+  try {
+    const supported = await isSupported();
+    if (!supported) return () => {};
+    const messaging = getMessaging(app);
+    const unsub = onMessage(messaging, (payload) => {
+      console.log('[FCM] Foreground message:', payload);
+      const title = payload.notification?.title ?? 'ServeSync';
+      const body  = payload.notification?.body  ?? '';
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/manifest.json' });
+      }
+    });
+    return unsub;
+  } catch (err) {
+    console.error('[FCM] listenForegroundMessages error:', err);
+    return () => {};
+  }
+}
 
 export enum OperationType {
   CREATE = 'create',

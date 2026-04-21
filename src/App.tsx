@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from './components/ui/sonner';
 import Navbar from './components/Navbar';
 import ChatAssistant from './components/ChatAssistant';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 // Pages
 import Home from './pages/Home';
@@ -37,6 +38,7 @@ const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 
 
 function AppRoutes() {
   const { user, profile, loading } = useAuth();
+  usePushNotifications();
 
   // Admin gets its own full-page layout — no shared Navbar or container.
   // /admin-login must stay accessible even before auth resolves.
