@@ -107,7 +107,7 @@ export default function NGODashboard() {
         dateTime,
         requiredSkills,
         ngoId: user.uid,
-        ngoName: profile.displayName || profile.organizationName,
+        ngoName: profile.displayName || profile.organizationName || 'NGO',
         createdAt: new Date().toISOString(),
       };
       console.log('Saving opportunity:', data);
@@ -220,12 +220,13 @@ export default function NGODashboard() {
               </Button>
             }
           />
-          <DialogContent className="sm:max-w-[480px] rounded-3xl border border-slate-300 bg-white shadow-2xl">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[480px] rounded-3xl border border-slate-300 bg-white shadow-2xl p-0 overflow-hidden">
+            <div className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader className="px-6 pt-6 pb-0">
               <DialogTitle className="text-2xl font-bold">Create Opportunity</DialogTitle>
-              <DialogDescription>Fill in the details for your new volunteering event.</DialogDescription>
+              <DialogDescription className="px-0">Fill in the details for your new volunteering event.</DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleCreateOpportunity} className="space-y-4 pt-4">
+            <form onSubmit={handleCreateOpportunity} className="space-y-4 px-6 pt-4 pb-6">
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-sm font-semibold text-slate-700">Title</Label>
                 <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. Weekend Beach Cleanup" className="rounded-xl border-slate-200 focus:ring-primary" />
@@ -257,6 +258,7 @@ export default function NGODashboard() {
                 {submitting ? 'Posting...' : 'Post Opportunity'}
               </Button>
             </form>
+            </div>
           </DialogContent>
         </Dialog>
       </header>
