@@ -275,6 +275,7 @@ src/
 
 ##  Screenshots  
 **NGO Screen**
+https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%201.png?raw=true
 https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%201.png
 https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2010.png
 https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2011.png
