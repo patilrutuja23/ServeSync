@@ -276,33 +276,64 @@ src/
 ##  Screenshots  
 **NGO Screen**
 
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0e737f0739be0ff3a99b204bd1d94479a760f442/assets/screens/NGO%20screen%201.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%2010.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%2011.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%202.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%203.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%204.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%205.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%206.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%207.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%208.png)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%209.png)
+## 💻 NGO Dashboard
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%201.png" width="400"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2010.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2011.png" width="400"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%202.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%203.png" width="400"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%204.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%205.png" width="400"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%206.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%207.png" width="400"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%208.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%209.png" width="400"/>
+</p>
 
 
 **Volunteer Screen**
 
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%2011.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%205.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%207.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%2010.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%201.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%202.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%203.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%204.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%206.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%208.jpeg)
-![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0a50a577746df0cba58c04cf567c5759c40cf6e1/assets/screens/volunteer%209.jpeg)
+## 📸 Screenshots
 
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%2011.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%205.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%207.jpeg" width="250"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%2010.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%201.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%202.jpeg" width="250"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%203.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%204.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%206.jpeg" width="250"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%208.jpeg" width="250"/>
+  <img src="https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/volunteer%209.jpeg" width="250"/>
+</p>
 ---
 
 ## 👥 Team
