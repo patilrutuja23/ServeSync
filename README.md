@@ -275,10 +275,8 @@ src/
 
 ##  Screenshots  
 **NGO Screen**
-https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%201.png?raw=true
-https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%201.png
-https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2010.png
-https://github.com/patilrutuja23/ServeSync/blob/main/assets/screens/NGO%20screen%2011.png
+
+https://github.com/patilrutuja23/ServeSync/blob/0e737f0739be0ff3a99b204bd1d94479a760f442/assets/screens/NGO%20screen%201.png
 **Volunteer Screen**
 
 
