@@ -276,7 +276,8 @@ src/
 ##  Screenshots  
 **NGO Screen**
 
-![image alt] (https://github.com/patilrutuja23/ServeSync/blob/0e737f0739be0ff3a99b204bd1d94479a760f442/assets/screens/NGO%20screen%201.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0e737f0739be0ff3a99b204bd1d94479a760f442/assets/screens/NGO%20screen%201.png)
+ 
 **Volunteer Screen**
 
 
