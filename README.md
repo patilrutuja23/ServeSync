@@ -277,7 +277,17 @@ src/
 **NGO Screen**
 
 ![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/0e737f0739be0ff3a99b204bd1d94479a760f442/assets/screens/NGO%20screen%201.png)
- 
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%2010.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%2011.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%202.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%203.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%204.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%205.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%206.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%207.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%208.png)
+![Alt Text](https://github.com/patilrutuja23/ServeSync/blob/1b97ac4042ccba8b3fcb8b80e1afb149b1e309de/assets/screens/NGO%20screen%209.png)
+
 **Volunteer Screen**
 
 
