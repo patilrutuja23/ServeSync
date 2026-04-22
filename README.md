@@ -55,7 +55,10 @@ We built a **fully real-time ecosystem** with:
 * 📊 **Impact Tracking Dashboard**
 
 ---
+## Demo
 
+
+---
 ## 🧠 AI Matching System
 
 ### 👉 Why this volunteer is a good fit?
@@ -270,9 +273,11 @@ src/
 
 ---
 
-## 📸 Screenshots / Demo
+##  Screenshots  
+**NGO Screen**
 
 
+**Volunteer Screen**
 
 
 ---
