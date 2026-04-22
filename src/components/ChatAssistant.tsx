@@ -55,7 +55,7 @@ export default function ChatAssistant() {
       .filter(m => m.id !== 'welcome')
       .map(m => ({ role: m.role, content: m.content }));
 
-    const response = await sendChatMessage(text, opportunities, history);
+    const response = await sendChatMessage(text, opportunities, history, profile?.role ?? 'volunteer');
 
     setMessages(prev => [...prev, {
       id: (Date.now() + 1).toString(),

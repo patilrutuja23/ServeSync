@@ -1,24 +1,4 @@
-// All AI features use the existing VITE_GEMINI_API_KEY — no backend needed.
-
-async function gemini(prompt: string, maxTokens = 120): Promise<string> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-  if (!apiKey) throw new Error('No VITE_GEMINI_API_KEY');
-
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.4, maxOutputTokens: maxTokens },
-      }),
-    }
-  );
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
-  const json = await res.json();
-  return json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-}
+import { callGemini } from './geminiClient';
 
 // ─── 1. Match Explanation ─────────────────────────────────────────────────────
 
@@ -41,7 +21,7 @@ Location: ${opportunity.location || 'unknown'}
 Description: ${opportunity.description || 'none'}`;
 
   console.log('[MatchExplain] Generating for:', volunteer.displayName, '→', opportunity.title);
-  return gemini(prompt, 100);
+  return callGemini({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 120 } });
 }
 
 // ─── 2. Fake NGO Detection ────────────────────────────────────────────────────
@@ -59,7 +39,6 @@ export async function detectFakeNGO(ngo: {
   opportunityCount: number;
   postCount: number;
 }): Promise<TrustResult> {
-  // Fast rule-based pre-check — no API call needed for obvious cases
   const flags: string[] = [];
   if (!ngo.bio || ngo.bio.trim().length < 20) flags.push('missing or very short description');
   if (!ngo.location) flags.push('no location set');
@@ -73,7 +52,6 @@ export async function detectFakeNGO(ngo: {
     return { status: 'trusted', reason: 'This NGO has been verified by the ServeSync team.' };
   }
 
-  // Use AI for borderline cases
   const prompt = `You are a trust analyst for a volunteer platform.
 Analyze this NGO profile and respond with ONLY a JSON object — no markdown, no extra text.
 Format: {"status":"trusted"|"suspicious"|"unverified","reason":"one sentence"}
@@ -87,17 +65,16 @@ Community posts: ${ngo.postCount}
 Flags: ${flags.join(', ') || 'none'}`;
 
   try {
-    const raw = await gemini(prompt, 80);
+    const raw = await callGemini({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 80 } });
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) {
       const parsed = JSON.parse(match[0]);
       if (parsed.status && parsed.reason) return parsed as TrustResult;
     }
   } catch (err) {
-    console.error('[FakeNGO] Parse error:', err);
+    console.error('[FakeNGO] Error:', err);
   }
 
-  // Fallback
   return flags.length > 0
     ? { status: 'unverified', reason: `Profile has ${flags.length} incomplete field(s).` }
     : { status: 'trusted', reason: 'Profile appears complete and legitimate.' };
@@ -111,11 +88,10 @@ export function calculateImpactScore(metrics: {
   postsCreated: number;
   activeNGOs: number;
 }): number {
-  // Weighted formula — capped at 100
   const score =
-    Math.min(metrics.totalVolunteers / 2, 30) +   // up to 30 pts
-    Math.min(metrics.tasksCompleted * 2, 40) +     // up to 40 pts
-    Math.min(metrics.postsCreated / 2, 15) +       // up to 15 pts
-    Math.min(metrics.activeNGOs * 3, 15);          // up to 15 pts
+    Math.min(metrics.totalVolunteers / 2, 30) +
+    Math.min(metrics.tasksCompleted * 2, 40) +
+    Math.min(metrics.postsCreated / 2, 15) +
+    Math.min(metrics.activeNGOs * 3, 15);
   return Math.round(Math.min(score, 100));
 }

@@ -57,7 +57,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="glass-effect border-b border-slate-100 sticky top-0 z-50 h-[72px] flex items-center shrink-0">
+    <header className="glass-effect border-b border-slate-100 sticky top-0 z-50 h-[72px] flex items-center shrink-0 relative">
       <div className="container mx-auto px-8 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
@@ -166,6 +166,49 @@ export default function Navbar() {
           </Button>
         </div>
       </div>
+
+      {/* ── Mobile Menu Panel ── */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-[72px] left-0 right-0 bg-white border-b border-slate-100 shadow-lg z-50 py-3 px-4 space-y-1">
+          {user && profile?.role === 'volunteer' && (
+            <>
+              {[['/', 'Dashboard'], ['/volunteer/opportunities', 'Opportunities'], ['/community', 'Community'], ['/impact', 'Impact'], ['/chat', 'Messages'], ['/volunteer/profile', 'My Profile']].map(([path, label]) => (
+                <Link key={path} to={path} onClick={() => setIsMenuOpen(false)}
+                  className={`block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    location.pathname === path ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'
+                  }`}>
+                  {label}
+                </Link>
+              ))}
+            </>
+          )}
+          {user && profile?.role === 'ngo' && (
+            <>
+              {[['/ngo', 'Dashboard'], ['/ngo/search', 'Find Volunteers'], ['/community', 'Community'], ['/impact', 'Impact'], ['/chat', 'Messages'], ['/ngo/invites', 'Sent Invites'], ['/ngo/verification', 'Verification'], ['/ngo/blog', 'Posts'], ['/ngo/profile', 'NGO Profile']].map(([path, label]) => (
+                <Link key={path} to={path} onClick={() => setIsMenuOpen(false)}
+                  className={`block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    location.pathname === path ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'
+                  }`}>
+                  {label}
+                </Link>
+              ))}
+            </>
+          )}
+          {!user && (
+            <>
+              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">Log in</Link>
+              <Link to="/register" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-sm font-bold text-primary hover:bg-primary/5">Get Started</Link>
+              <Link to="/admin-login" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50">Admin Login</Link>
+            </>
+          )}
+          {user && (
+            <button onClick={() => { handleSignOut(); setIsMenuOpen(false); }}
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
+              Sign Out
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 }

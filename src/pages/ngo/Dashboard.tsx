@@ -140,11 +140,17 @@ export default function NGODashboard() {
       const snap = await getDocs(q);
       const conns = snap.docs.map(d => ({ id: d.id, ...d.data() as any }));
 
-      // fetch volunteer profiles
+      // Fetch volunteer profiles by direct doc read (no index needed)
       const enriched = await Promise.all(conns.map(async (conn) => {
-        const vSnap = await getDocs(query(collection(db, 'users'), where('uid', '==', conn.volunteerId)));
-        const volunteer = vSnap.docs[0]?.data() || {};
-        return { ...conn, volunteerName: volunteer.displayName || conn.volunteerId, volunteerPhoto: volunteer.photoURL || '' };
+        try {
+          const vDoc = await import('firebase/firestore').then(({ getDoc, doc: firestoreDoc }) =>
+            getDoc(firestoreDoc(db, 'users', conn.volunteerId))
+          );
+          const volunteer = vDoc.exists() ? vDoc.data() : {};
+          return { ...conn, volunteerName: (volunteer as any).displayName || conn.volunteerId, volunteerPhoto: (volunteer as any).photoURL || '' };
+        } catch {
+          return { ...conn, volunteerName: conn.volunteerId, volunteerPhoto: '' };
+        }
       }));
       setParticipants(enriched);
     } catch (error) {

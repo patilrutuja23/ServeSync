@@ -110,12 +110,6 @@ export function calculateRuleScore(volunteer: any, opportunity: any): { score: n
 // ─── 2. AI score via Gemini (0–100) ──────────────────────────────────────────
 
 export async function getAIScore(volunteer: any, opportunity: any): Promise<number> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-  if (!apiKey) {
-    console.warn('[AIScore] No VITE_GEMINI_API_KEY — skipping AI scoring.');
-    return -1;
-  }
-
   const prompt = `
 You are a volunteer-opportunity matching engine.
 Rate the compatibility between this volunteer and opportunity on a scale of 0 to 100.
@@ -135,36 +129,20 @@ Opportunity:
 `.trim();
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 8 },
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      console.error('[AIScore] Gemini API error:', res.status, await res.text());
-      return -1;
-    }
-
-    const json = await res.json();
-    const raw = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
+    const { callGemini } = await import('./geminiClient');
+    const raw = await callGemini({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0, maxOutputTokens: 8 },
+    });
     const parsed = parseInt(raw, 10);
-
     if (isNaN(parsed) || parsed < 0 || parsed > 100) {
       console.warn('[AIScore] Unexpected response:', raw);
       return -1;
     }
-
     console.log(`[AIScore] ${opportunity.title}: ${parsed}`);
     return parsed;
   } catch (err) {
-    console.error('[AIScore] Fetch failed:', err);
+    console.error('[AIScore] Failed:', err);
     return -1;
   }
 }

@@ -10,6 +10,7 @@ import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { ImagePlus, Send, X, Sparkles, Loader2 } from 'lucide-react';
 import UserAvatar from './UserAvatar';
+import { callGemini } from '../lib/geminiClient';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -30,9 +31,6 @@ async function generateCaptions(
   role: string,
   tone: Tone
 ): Promise<string[]> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-  if (!apiKey) throw new Error('No VITE_GEMINI_API_KEY set.');
-
   const context = [title && `Title: ${title}`, hint && `Context: ${hint}`].filter(Boolean).join('\n');
   if (!context) throw new Error('empty');
 
@@ -45,23 +43,10 @@ ${context}
 Return ONLY a JSON array of 3 strings, no extra text. Example:
 ["Caption one here.", "Caption two here.", "Caption three here."]`;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 300 },
-      }),
-    }
-  );
-
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
-  const json = await res.json();
-  const raw = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-
-  // Extract JSON array from response
+  const raw = await callGemini({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.9, maxOutputTokens: 300 },
+  });
   const match = raw.match(/\[[\s\S]*\]/);
   if (!match) throw new Error('Bad response format');
   return JSON.parse(match[0]) as string[];

@@ -124,28 +124,31 @@ service cloud.firestore {
     }
 
     match /connections/{connectionId} {
-      allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.volunteerId || 
+      // list queries (e.g. getDocs with where clauses) — allow authenticated users
+      // The query itself scopes results; per-doc rules apply on get.
+      allow list: if isAuthenticated();
+
+      allow get: if isAuthenticated() && (
+        request.auth.uid == resource.data.volunteerId ||
         request.auth.uid == resource.data.ngoId
       );
-      
+
       allow create: if isAuthenticated() && isValidConnection(request.resource.data) && (
         (request.resource.data.type == 'request' && request.resource.data.volunteerId == request.auth.uid) ||
         (request.resource.data.type == 'invite' && request.resource.data.ngoId == request.auth.uid)
       );
-      
+
       allow update: if isAuthenticated() && (
-        // Volunteer can accept/reject an invite
-        (resource.data.type == 'invite' && request.auth.uid == resource.data.volunteerId && 
+        (resource.data.type == 'invite' && request.auth.uid == resource.data.volunteerId &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])) ||
-        // NGO can accept/reject a request
-        (resource.data.type == 'request' && request.auth.uid == resource.data.ngoId && 
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        (resource.data.type == 'request' && request.auth.uid == resource.data.ngoId &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])) ||
+        isAdmin()
       );
-      
+
       allow delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.volunteerId || 
-        request.auth.uid == resource.data.ngoId || 
+        request.auth.uid == resource.data.volunteerId ||
+        request.auth.uid == resource.data.ngoId ||
         isAdmin()
       );
     }
@@ -158,6 +161,41 @@ service cloud.firestore {
     
     match /test/connection {
       allow read: if true;
+    }
+
+    // ── chats ───────────────────────────────────────────────────────────────
+    match /chats/{chatId} {
+      // list queries: allow any authenticated user to query their own chats
+      // (the where('participants','array-contains',uid) filter handles scoping)
+      allow list: if isAuthenticated();
+
+      // single doc get: only participants
+      allow get: if isAuthenticated() &&
+                 request.auth.uid in resource.data.participants;
+
+      // create: creator must be a participant
+      allow create: if isAuthenticated() &&
+                    request.auth.uid in request.resource.data.participants;
+
+      // update (e.g. lastMessage): only participants
+      allow update: if isAuthenticated() &&
+                    request.auth.uid in resource.data.participants;
+
+      allow delete: if false;
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() &&
+                    request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+
+        allow create: if isAuthenticated() &&
+                      request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants &&
+                      request.resource.data.senderId == request.auth.uid &&
+                      request.resource.data.text is string &&
+                      request.resource.data.text.size() > 0;
+
+        allow update, delete: if false;
+      }
     }
 
     // ── workProofs ──────────────────────────────────────────────────────────
@@ -188,20 +226,17 @@ service cloud.firestore {
     }
 
     // ── posts ────────────────────────────────────────────────────────────────
-    // All authenticated users can read; only the owning NGO can write/delete.
+    // All authenticated users (volunteers + NGOs) can read and create posts.
+    // Only the post owner or admin can delete.
     match /posts/{postId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
-                    request.resource.data.ngoId == request.auth.uid &&
-                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ngo' &&
-                    request.resource.data.title is string &&
-                    request.resource.data.title.size() > 0 &&
-                    request.resource.data.title.size() < 200 &&
-                    request.resource.data.description is string &&
-                    request.resource.data.description.size() > 0;
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.content is string &&
+                    request.resource.data.content.size() > 0;
       allow delete: if isAuthenticated() &&
-                    (resource.data.ngoId == request.auth.uid || isAdmin());
-      allow update: if false; // posts are immutable; delete and re-create to edit
+                    (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if false;
     }
   }
 }

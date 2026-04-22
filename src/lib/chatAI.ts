@@ -1,76 +1,48 @@
-// AI Chat Assistant using Gemini 1.5 Flash
+import { callGemini } from './geminiClient';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-/**
- * Sends a chat message to Gemini with opportunity context.
- * Returns the AI's response text.
- */
 export async function sendChatMessage(
   userMessage: string,
   opportunities: any[],
-  chatHistory: Message[] = []
+  chatHistory: Message[] = [],
+  userRole: 'volunteer' | 'ngo' | 'admin' = 'volunteer'
 ): Promise<string> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-  console.log('[ChatAI] API key present:', !!apiKey);
-  if (!apiKey) {
-    return '⚠️ AI assistant unavailable. Please set VITE_GEMINI_API_KEY in your .env.local file.';
-  }
-
-  // Limit context to top 5 opportunities for performance
   const topOpps = opportunities.slice(0, 5);
   const oppContext = topOpps.length > 0
     ? topOpps.map((o, i) => `${i + 1}. ${o.title} by ${o.ngoName} (${o.location}) - Skills: ${(o.requiredSkills || []).join(', ')}`).join('\n')
     : 'No opportunities available.';
 
-  const systemPrompt = `You are a helpful volunteer coordinator assistant for ServeSync.
-You help volunteers find the best opportunities to contribute their skills.
+  const roleContext = userRole === 'ngo'
+    ? `You are helping an NGO user. Help them post opportunities, find volunteers, manage their profile, and use the verification system.`
+    : `You are helping a volunteer. Help them find opportunities, connect with NGOs, and track their impact.`;
 
-Available opportunities:
+  const systemPrompt = `You are a helpful assistant for ServeSync, an AI-powered NGO-Volunteer matching platform.
+${roleContext}
+
+Current opportunities on the platform:
 ${oppContext}
 
-Be concise, friendly, and suggest relevant opportunities based on the user's question.`;
+Be concise, friendly, and specific. If asked how to find volunteers (for NGO) or opportunities (for volunteer), explain the platform features clearly.`;
 
-  // Build conversation history for context
   const contents = [
-    { role: 'user', parts: [{ text: systemPrompt }] },
+    { role: 'user' as const, parts: [{ text: systemPrompt }] },
     ...chatHistory.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
+      role: (msg.role === 'user' ? 'user' : 'model') as 'user' | 'model',
       parts: [{ text: msg.content }],
     })),
-    { role: 'user', parts: [{ text: userMessage }] },
+    { role: 'user' as const, parts: [{ text: userMessage }] },
   ];
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents }),
-      }
-    );
-
-    if (!res.ok) {
-      console.error('[ChatAI] Gemini error:', res.status, await res.text());
-      return "Sorry, I'm having trouble connecting right now. Please try again.";
-    }
-
-    const json = await res.json();
-    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-
-    if (!text) {
-      console.warn('[ChatAI] Empty response from Gemini');
-      return "I couldn't generate a response. Please try rephrasing your question.";
-    }
-
-    console.log('[ChatAI] Response generated:', text.substring(0, 100) + '...');
+    const text = await callGemini({ contents });
+    console.log('[ChatAI] Response:', text.substring(0, 80) + '...');
     return text;
   } catch (err) {
-    console.error('[ChatAI] Fetch failed:', err);
-    return "Network error. Please check your connection and try again.";
+    console.error('[ChatAI] Error:', err);
+    return "Sorry, I'm having trouble connecting right now. Please try again.";
   }
 }

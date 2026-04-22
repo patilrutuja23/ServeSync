@@ -47,8 +47,8 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ─── Asset caching ────────────────────────────────────────────────────────────
-const CACHE_NAME = 'servesync-v2';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE_NAME = 'servesync-v3';  // bumped — forces old SW to discard stale cache
+const ASSETS = ['/manifest.json'];  // only cache manifest, NOT index.html or JS/CSS
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -67,8 +67,16 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests for same-origin assets
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // Never intercept JS, CSS, or HTML — let them go straight to network.
+  // This prevents the SW from serving stale index.html for JS module requests.
+  const ext = url.pathname.split('.').pop();
+  if (['js', 'css', 'html', 'mjs'].includes(ext)) return;
+
+  // For everything else (images, fonts, manifest) use cache-first
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );

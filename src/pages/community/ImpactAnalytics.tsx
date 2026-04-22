@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { Card } from '../../components/ui/card';
 import { calculateImpactScore } from '../../lib/aiFeatures';
 import { Users, CheckCircle2, FileText, Building2, Zap, TrendingUp } from 'lucide-react';
@@ -26,33 +26,48 @@ export default function ImpactAnalytics() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        console.log('[ImpactAnalytics] Fetching metrics...');
-        const [volSnap, ngoSnap, taskSnap, postSnap] = await Promise.all([
-          getCountFromServer(query(collection(db, 'users'), where('role', '==', 'volunteer'))),
-          getCountFromServer(query(collection(db, 'users'), where('role', '==', 'ngo'))),
-          getCountFromServer(query(collection(db, 'connections'), where('status', '==', 'completed'))),
-          getCountFromServer(collection(db, 'posts')),
-        ]);
+    // Use onSnapshot counts — no composite index required unlike getCountFromServer
+    const unsubs: (() => void)[] = [];
+    const counts = { volunteers: 0, ngos: 0, tasks: 0, posts: 0, ready: 0 };
 
-        const m = {
-          totalVolunteers: volSnap.data().count,
-          activeNGOs:      ngoSnap.data().count,
-          tasksCompleted:  taskSnap.data().count,
-          postsCreated:    postSnap.data().count,
-          impactScore:     0,
-        };
-        m.impactScore = calculateImpactScore(m);
-        console.log('[ImpactAnalytics] Metrics:', m);
-        setMetrics(m);
-      } catch (err) {
-        console.error('[ImpactAnalytics] Error:', err);
-      } finally {
-        setLoading(false);
-      }
+    const trySet = () => {
+      counts.ready++;
+      if (counts.ready < 4) return;
+      const m = {
+        totalVolunteers: counts.volunteers,
+        activeNGOs:      counts.ngos,
+        tasksCompleted:  counts.tasks,
+        postsCreated:    counts.posts,
+        impactScore:     0,
+      };
+      m.impactScore = calculateImpactScore(m);
+      console.log('[ImpactAnalytics] Metrics:', m);
+      setMetrics(m);
+      setLoading(false);
     };
-    load();
+
+    unsubs.push(onSnapshot(
+      query(collection(db, 'users'), where('role', '==', 'volunteer')),
+      s => { counts.volunteers = s.size; trySet(); },
+      e => { console.error('[ImpactAnalytics] volunteers:', e.code); setLoading(false); }
+    ));
+    unsubs.push(onSnapshot(
+      query(collection(db, 'users'), where('role', '==', 'ngo')),
+      s => { counts.ngos = s.size; trySet(); },
+      e => { console.error('[ImpactAnalytics] ngos:', e.code); setLoading(false); }
+    ));
+    unsubs.push(onSnapshot(
+      query(collection(db, 'connections'), where('status', '==', 'completed')),
+      s => { counts.tasks = s.size; trySet(); },
+      e => { console.error('[ImpactAnalytics] tasks:', e.code); setLoading(false); }
+    ));
+    unsubs.push(onSnapshot(
+      collection(db, 'posts'),
+      s => { counts.posts = s.size; trySet(); },
+      e => { console.error('[ImpactAnalytics] posts:', e.code); setLoading(false); }
+    ));
+
+    return () => unsubs.forEach(u => u());
   }, []);
 
   return (

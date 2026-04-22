@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../firebase';
 import {
-  collection, query, where, orderBy, onSnapshot,
+  collection, query, where, onSnapshot,
   addDoc, serverTimestamp, doc, setDoc, getDoc,
 } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
@@ -49,16 +49,32 @@ function MessagePanel({ chat, onBack }: { chat: Chat; onBack: () => void }) {
   const otherName = chat.participantNames[otherId] ?? 'User';
   const otherPhoto = chat.participantPhotos[otherId] ?? '';
 
-  // Real-time messages
+  // Real-time messages — handles null createdAt on optimistic local writes
   useEffect(() => {
+    console.log('[Chat] Subscribing to messages for chatId:', chat.id);
+    // Do NOT use orderBy here — it excludes docs where createdAt is null
+    // (which happens on the optimistic local write before server confirms).
+    // We sort client-side instead so messages never flicker or disappear.
     const q = query(
-      collection(db, 'chats', chat.id, 'messages'),
-      orderBy('createdAt', 'asc')
+      collection(db, 'chats', chat.id, 'messages')
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() as any })));
-    }, err => console.error('[Chat messages]', err));
-    return unsub;
+    const unsub = onSnapshot(q, { includeMetadataChanges: false }, (snap) => {
+      const msgs: Message[] = snap.docs
+        .map(d => ({ id: d.id, ...d.data() as any }))
+        .sort((a, b) => {
+          // Sort by seconds; treat null (pending server write) as very large
+          // so the sender's optimistic message always appears at the bottom
+          const aTs = a.createdAt?.seconds ?? Number.MAX_SAFE_INTEGER;
+          const bTs = b.createdAt?.seconds ?? Number.MAX_SAFE_INTEGER;
+          return aTs - bTs;
+        });
+      console.log('[Chat] Messages received:', msgs.length, 'for chatId:', chat.id);
+      setMessages(msgs);
+    }, err => console.error('[Chat messages] listener error:', err.code, err.message));
+    return () => {
+      console.log('[Chat] Unsubscribing messages for chatId:', chat.id);
+      unsub();
+    };
   }, [chat.id]);
 
   // Auto-scroll
@@ -163,18 +179,29 @@ export default function ChatPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Real-time chats list
+  // Real-time chats list — no orderBy to avoid null updatedAt breaking the listener
   useEffect(() => {
     if (!user) return;
+    console.log('[Chat] Subscribing to chats list for uid:', user.uid);
     const q = query(
       collection(db, 'chats'),
-      where('participants', 'array-contains', user.uid),
-      orderBy('updatedAt', 'desc')
+      where('participants', 'array-contains', user.uid)
     );
     const unsub = onSnapshot(q, (snap) => {
-      setChats(snap.docs.map(d => ({ id: d.id, ...d.data() as any })));
+      const sorted = snap.docs
+        .map(d => ({ id: d.id, ...d.data() as any }))
+        .sort((a, b) => {
+          const aTs = a.updatedAt?.seconds ?? 0;
+          const bTs = b.updatedAt?.seconds ?? 0;
+          return bTs - aTs;
+        });
+      console.log('[Chat] Chats list updated:', sorted.length, 'chats');
+      setChats(sorted);
       setLoading(false);
-    }, err => { console.error('[Chats list]', err); setLoading(false); });
+    }, err => {
+      console.error('[Chats list] listener error:', err.code, err.message);
+      setLoading(false);
+    });
     return unsub;
   }, [user]);
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
@@ -38,14 +38,22 @@ export default function CommunityFeed() {
   const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    // No orderBy — avoids excluding posts with null createdAt (optimistic writes).
+    // Sort client-side so posts never flicker or disappear on refresh.
+    const q = query(collection(db, 'posts'));
     const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() as any })) as Post[];
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() as any }))
+        .sort((a, b) => {
+          const aTs = a.createdAt?.seconds ?? 0;
+          const bTs = b.createdAt?.seconds ?? 0;
+          return bTs - aTs; // newest first
+        }) as Post[];
       console.log('[CommunityFeed] Posts loaded:', data.length);
       setPosts(data);
       setLoading(false);
     }, (err) => {
-      console.error('[CommunityFeed] Error:', err);
+      console.error('[CommunityFeed] Error:', err.code, err.message);
       setLoading(false);
     });
     return unsub;
