@@ -122,12 +122,31 @@ Our AI system:
 * ⚛️ React + Vite
 * 🔥 Firebase (Firestore, Auth, FCM, Hosting)
 * ☁️ Cloudinary (media storage)
-* 🤖 AI APIs (Gemini / OpenAI)
+* 🤖 AI APIs (Gemini)
 
 > “Our architecture uses Firebase for real-time synchronization, Cloudinary for storage, and AI APIs for intelligent matching.”
 
 ---
 
+## 🔐 Demo Accounts (For Judges & Reviewers)
+
+You can explore the platform using the following demo(login) accounts:
+
+### 👤 Volunteer
+- **Email:** demo.volunteer@servesync.com  
+- **Password:** Demo@123  
+
+### 🏢 NGO
+- **Email:** demo.ngo@servesync.com  
+- **Password:** Demo@123  
+
+---
+
+> ⚠️ **Note:**  
+> These are public demo accounts created for evaluation purposes only.  
+> Please do not use personal or sensitive data while testing.
+
+---
 ## ⚙️ Setup Instructions
 
 ### 1️⃣ Clone the repository
