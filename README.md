@@ -8,7 +8,7 @@
 
 Watch ServeSync in action:
 
-[![ServeSync Demo](https://img.youtube.com/vi/yvfSZyvuK8Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=yvfSZyvuK8Q)
+[![ServeSync Demo](https://img.youtube.com/vi/yvfSZyvuK8Q/hqdefault.jpg)](https://www.youtube.com/watch?v=yvfSZyvuK8Q)
 
 👉 Demo Video: https://www.youtube.com/watch?v=yvfSZyvuK8Q
 ---
