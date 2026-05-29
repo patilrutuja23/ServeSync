@@ -4,7 +4,12 @@
 🚀 A **real-time AI-powered ecosystem** connecting NGOs and volunteers with intelligent matching, trust verification, and live collaboration.
 
 ---
+## 🎥 Demo Video
 
+
+[![Watch the demo](https://img.youtube.com/vi/v=yvfSZyvuK8Q/0.jpg)](https://www.youtube.com/watch?v=yvfSZyvuK8Q)
+
+---
 ## 🔗 Live Demo
 
 👉 https://servesync-e7dba.web.app/
