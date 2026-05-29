@@ -6,9 +6,11 @@
 ---
 ## 🎥 Demo Video
 
+Watch ServeSync in action:
 
-[![Watch the demo](https://img.youtube.com/vi/v=yvfSZyvuK8Q/0.jpg)](https://www.youtube.com/watch?v=yvfSZyvuK8Q)
+[![ServeSync Demo](https://img.youtube.com/vi/yvfSZyvuK8Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=yvfSZyvuK8Q)
 
+👉 Demo Video: https://www.youtube.com/watch?v=yvfSZyvuK8Q
 ---
 ## 🔗 Live Demo
 
